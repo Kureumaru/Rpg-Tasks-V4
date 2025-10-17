@@ -123,7 +123,7 @@ button.icon-btn:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
+  padding: 5px 10px;
   border-radius: 10px;
   background: var(--glass);
   margin-bottom: 8px;
@@ -322,4 +322,60 @@ button.small {
   .controls {flex-direction:column;align-items:stretch;}
   form#taskForm {grid-template-columns:1fr;}
   .app {max-width:100%;border-radius:0;margin:0;overflow-y:auto;}
+
+  /* 🔧 Added mobile fixes */
+  body {
+    font-size: 14px;
+  }
+
+  .stat-row {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+
+  .attr b {
+    font-size: 16px;
+  }
+
+  .attr small {
+    font-size: 11px;
+  }
+
+  .task {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task .actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  button.small {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+
+  .portrait img {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* Ensure no cutoff */
+  .app {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* 🔹 Extra tiny screen support */
+@media (max-width:000px){
+  html, body {
+    font-size: 10px;
+  }
+  .app {
+    margin: 0;
+    border-radius: 0;
+  }
 }
