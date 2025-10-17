@@ -89,6 +89,27 @@
     </header>
 
     <!-- 🧙 Left panel -->
+
+    <!-- New Task Modal -->
+    <div id="newTaskModal" style="display:none;position:fixed;inset:0;z-index:999;align-items:center;justify-content:center;background:rgba(2,6,23,0.6)">
+      <div style="background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;min-width:320px;max-width:90vw;border:1px solid rgba(255,255,255,0.04)">
+        <h3 style="margin-top:0;margin-bottom:8px">New Quest</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input id="newTaskName" type="text" placeholder="Quest name" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+          <div style="display:flex;gap:8px">
+            <select id="newTaskDifficulty" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+            <select id="newTaskStat" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+          </div>
+          <select id="newTaskCategory" style="padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+          <label style="display:flex;gap:8px;align-items:center"><input id="newTaskBonus" type="checkbox"> Bonus (+20%)</label>
+          <label style="display:flex;gap:8px;align-items:center"><input id="newTaskRepeat" type="checkbox"> Repeatable</label>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button id="cancelNewTask" class="btn outline">Cancel</button>
+            <button id="confirmNewTask" class="btn">Add Quest</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <aside class="left-panel">
       <div class="portrait"><img id="charPortrait" src="char.png" alt="Character"></div>
       <div class="stats">
@@ -187,14 +208,25 @@
       });
     }
 
-    function addTask(){
-      const name=prompt('Quest name?');if(!name)return;
-      const diff=prompt('Difficulty?','Easy');const stat=prompt('Stat focus?','');
-      const cat=prompt('Category?','daily');const bonus=confirm('Bonus (+20%)?');const rep=confirm('Repeatable?');
-      state.tasks.push({name,difficulty:diff,stat,category:cat,bonus,repeatable:rep,count:0,color:'#c084fc'});save();renderTasks();
+    // Populate modal selects
+    const difficultyKeys = ['VeryEasy','Easy','Normal','Medium','Hard','Legendary'];
+    const statOptions = [{v:'strength',t:'Strength'},{v:'dexterity',t:'Dexterity'},{v:'vitality',t:'Vitality'},{v:'intelligence',t:'Intelligence'},{v:'wisdom',t:'Wisdom'},{v:'charisma',t:'Charisma'},{v:'',t:'None'}];
+    const categories = ['General','Combat','Crafting','Exploration','Social','Chores','Study','Errands','Magic','Stealth','Fitness'];
+
+    function populateNewTaskModal(){
+      const dSel=qs('#newTaskDifficulty');dSel.innerHTML='';difficultyKeys.forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k; if(k==='Easy')o.selected=true;dSel.appendChild(o)});
+      const sSel=qs('#newTaskStat');sSel.innerHTML='';statOptions.forEach(s=>{const o=document.createElement('option');o.value=s.v;o.textContent=s.t; sSel.appendChild(o)});
+      const cSel=qs('#newTaskCategory');cSel.innerHTML='';categories.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cSel.appendChild(o)});
     }
 
-    qs('#showNewTask').onclick=addTask;
+    qs('#showNewTask').onclick=()=>{populateNewTaskModal();qs('#newTaskName').value='';qs('#newTaskBonus').checked=false;qs('#newTaskRepeat').checked=false;qs('#newTaskModal').style.display='flex';}
+    qs('#cancelNewTask').onclick=()=>{qs('#newTaskModal').style.display='none'};
+    qs('#confirmNewTask').onclick=()=>{
+      const name=qs('#newTaskName').value.trim();if(!name){toast('Please enter a quest name');return}
+      const diff=qs('#newTaskDifficulty').value;const stat=qs('#newTaskStat').value;const cat=qs('#newTaskCategory').value;const bonus=qs('#newTaskBonus').checked;const rep=qs('#newTaskRepeat').checked;
+      state.tasks.push({name,difficulty:diff,stat,category:cat,bonus,repeatable:rep,count:0,color:'#c084fc'});
+      save();renderTasks();qs('#newTaskModal').style.display='none';toast('Quest added');
+    };
     qs('#resetGameBtn').onclick=()=>{if(confirm('Reset all data?')){state=deepClone(defaultState);save();renderAll();toast('Reset!');}};
     function renderAll(){renderPlayer();renderTasks();}
     renderAll();
