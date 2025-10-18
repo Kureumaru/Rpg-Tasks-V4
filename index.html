@@ -160,7 +160,12 @@
 
     <!-- ⚙ Right -->
     <aside class="right-panel">
-      <div class="panel"><button id="resetGameBtn" class="btn outline">Reset Game</button></div>
+      <div class="panel">
+        <button id="resetGameBtn" class="btn outline" style="width:100%;margin-bottom:8px">Reset Game</button>
+        <button id="exportSaveBtn" class="btn outline" style="width:100%;margin-bottom:8px">Export Save</button>
+        <input type="file" id="importSaveFile" accept=".json" style="display:none">
+        <button id="importSaveBtn" class="btn outline" style="width:100%">Import Save</button>
+      </div>
     </aside>
   </div>
 
@@ -243,6 +248,50 @@
       save();renderTasks();qs('#newTaskModal').style.display='none';toast('Quest added');
     };
     qs('#resetGameBtn').onclick=()=>{if(confirm('Reset all data?')){state=deepClone(defaultState);save();renderAll();toast('Reset!');}};
+
+    // Export save handler
+    qs('#exportSaveBtn').onclick=()=>{
+      const saveData = JSON.stringify(state, null, 2);
+      const blob = new Blob([saveData], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().split('T')[0];
+      a.download = `rpg-tasks-save-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      toast('Save file exported!');
+    };
+
+    // Import save handler
+    qs('#importSaveBtn').onclick=()=>qs('#importSaveFile').click();
+    qs('#importSaveFile').onchange=(e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload=(e)=>{
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if(importedState && importedState.player && importedState.tasks) {
+            state = importedState;
+            save();
+            renderAll();
+            toast('Save imported successfully!');
+          } else {
+            toast('Invalid save file format');
+          }
+        } catch(err) {
+          toast('Error reading save file');
+          console.error('Import error:', err);
+        }
+      };
+      reader.readAsText(file);
+    };
+
     function renderAll(){renderPlayer();renderTasks();}
     renderAll();
   </script>
