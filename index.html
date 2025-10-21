@@ -93,7 +93,6 @@
       </div>
     </header>
 
-    <!-- 🧙 Left Panel -->
     <aside class="left-panel">
       <div class="portrait"><img id="charPortrait" src="char.png" alt="Character"></div>
       <div class="stats">
@@ -119,13 +118,11 @@
       </div>
     </aside>
 
-    <!-- 🗒 Center -->
     <main class="center-panel">
       <div class="panel"><button id="showNewTask" class="btn">+ New Quest</button></div>
       <div class="panel"><h3 style="margin-top:0">Open Quests</h3><ul class="task-list" id="taskList"></ul></div>
     </main>
 
-    <!-- ⚙ Right -->
     <aside class="right-panel">
       <div class="panel">
         <button id="resetGameBtn" class="btn outline" style="width:100%;margin-bottom:8px">Reset Game</button>
@@ -148,7 +145,6 @@
         </div>
         <select id="newTaskCategory" style="padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
 
-        <!-- ✅ NEW: Negative Task Toggle -->
         <label style="display:flex;gap:8px;align-items:center;color:var(--danger)">
           <input id="newTaskNegative" type="checkbox"> Negative Quest (penalty)
         </label>
@@ -192,10 +188,7 @@
 
     function getRewardForDifficulty(d){const t={VeryEasy:{xp:5,gold:2},Easy:{xp:10,gold:5},Normal:{xp:20,gold:10},Medium:{xp:35,gold:20},Hard:{xp:60,gold:40},Legendary:{xp:120,gold:100}};return t[d]||t.Easy;}
 
-    // ✅ Updated completeTask supports negative quests and level-downs
     function xpToNextForLevel(level){
-      // matches existing growth: each level multiplies xpToNext by ~1.25
-      // base is 100 at level 1
       let xpNext = 100;
       for(let l=1;l<level;l++) xpNext = Math.round(xpNext*1.25);
       return xpNext;
@@ -208,41 +201,27 @@
       let gold = Math.round(r.gold*(t.bonus?1.2:1));
       if(t.negative){ xp = -Math.abs(xp); gold = -Math.abs(gold); }
 
-      // Apply gold (never negative stored)
       state.player.gold = Math.max(0, state.player.gold + gold);
-
-      // Apply XP - allow it to go below 0 temporarily
       state.player.xp = state.player.xp + xp;
 
-      // Handle level-ups
       while(state.player.xp >= state.player.xpToNext){
         state.player.xp -= state.player.xpToNext;
         state.player.level++;
         state.player.xpToNext = Math.round(state.player.xpToNext*1.25);
       }
 
-      // Handle level-downs if XP went negative
       while(state.player.xp < 0 && state.player.level > 1){
-        // Step down one level
         state.player.level--;
-        // recompute xpToNext for the (new) current level
         state.player.xpToNext = xpToNextForLevel(state.player.level);
-        // When stepping down, previous level's xp should be xpToNext - deficit
-        // So add xpToNext to xp (since xp is negative) to move into positive range for lower level
         state.player.xp += state.player.xpToNext;
-        // If after adding we are still negative, loop will continue
       }
-
-      // Clamp to zero if we're at level 1 and xp negative
       if(state.player.level === 1 && state.player.xp < 0) state.player.xp = 0;
 
-      // Stats: gain on positive quests, deduct on negative quests (by 1), but never below 0
       const map={strength:'str',dexterity:'dex',vitality:'vit',intelligence:'int',wisdom:'wis',charisma:'cha'};
       const key=map[t.stat];
       let statChangeText = '';
       if(key && state.player.stats && typeof state.player.stats[key] !== 'undefined'){
         if(t.negative && xp < 0){
-          // Deduct one stat point for negative quests, don't go below 0
           const oldVal = state.player.stats[key] || 0;
           state.player.stats[key] = Math.max(0, oldVal - 1);
           statChangeText = `, ${key.toUpperCase()} -1`;
@@ -253,10 +232,8 @@
       }
 
       if(t.repeatable) {
-        // Increment completion counter for repeatable tasks
         t.count = (t.count || 0) + 1;
       } else {
-        // Remove non-repeatable tasks after completion
         state.tasks.splice(i,1);
       }
       save(); renderAll();

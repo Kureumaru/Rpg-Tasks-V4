@@ -1,4 +1,3 @@
-// --- Player data ---
 let player = {
   name: "Hero",
   level: 1,
@@ -16,8 +15,6 @@ let player = {
   inventory: [],
   equipment: {}
 };
-
-// --- Utility functions ---
 function savePlayerData() {
   localStorage.setItem("playerData", JSON.stringify(player));
 }
@@ -36,7 +33,6 @@ function showNotification(message, type = "info") {
   setTimeout(() => box.remove(), 3000);
 }
 
-// --- UI Update ---
 function updateUI() {
   document.getElementById("player-name").textContent = player.name;
   document.getElementById("player-level").textContent = player.level;
@@ -47,8 +43,6 @@ function updateUI() {
     if (el) el.textContent = player.stats[stat];
   }
 }
-
-// --- Leveling system ---
 function getXPNeededForLevel(level) {
   let xpNeeded = 100;
   for (let i = 1; i < level; i++) {
@@ -58,14 +52,12 @@ function getXPNeededForLevel(level) {
 }
 
 function adjustLevelAfterXPChange() {
-  // Calculate total XP across all levels
   let totalXP = 0;
   for (let lvl = 1; lvl < player.level; lvl++) {
     totalXP += getXPNeededForLevel(lvl);
   }
   totalXP += player.xp;
 
-  // Determine new level based on totalXP
   let newLevel = 1;
   let xpForNext = getXPNeededForLevel(newLevel);
   while (totalXP >= xpForNext) {
@@ -74,14 +66,12 @@ function adjustLevelAfterXPChange() {
     xpForNext = getXPNeededForLevel(newLevel);
   }
 
-  // Check if level changed
   if (newLevel > player.level) {
-    showNotification(`🎉 Level Up! You’re now level ${newLevel}!`, "success");
+    showNotification(`🎉 Level Up! You're now level ${newLevel}!`, "success");
   } else if (newLevel < player.level) {
     showNotification(`⬇️ Dropped to Level ${newLevel}...`, "danger");
   }
 
-  // Update player
   player.level = newLevel;
   player.xp = totalXP;
   player.xpToNext = getXPNeededForLevel(player.level);
@@ -90,7 +80,7 @@ function adjustLevelAfterXPChange() {
 // --- Task Completion Logic (supports positive and negative tasks) ---
 function completeTask(xp, gold) {
   player.xp += xp;
-  player.gold = Math.max(0, player.gold + gold); // gold cannot be negative
+  player.gold = Math.max(0, player.gold + gold);
 
   if (xp < 0 || gold < 0) {
     showNotification(`You lost ${Math.abs(xp)} XP and ${Math.abs(gold)} gold. 😢`, "danger");
@@ -102,20 +92,15 @@ function completeTask(xp, gold) {
   savePlayerData();
   updateUI();
 }
-
-// --- Manual Negative Task Function ---
 function completeNegativeTask(xpLoss, goldLoss) {
   completeTask(-Math.abs(xpLoss), -Math.abs(goldLoss));
 }
 
-// --- Example task array ---
 const tasks = [
   { name: "Drink Water", xp: 10, gold: 5 },
   { name: "Workout", xp: 25, gold: 15 },
-  { name: "Missed Sleep", xp: -15, gold: -10 } // negative task example
+  { name: "Missed Sleep", xp: -15, gold: -10 }
 ];
-
-// --- Function to trigger tasks ---
 function completeNamedTask(taskName) {
   const task = tasks.find(t => t.name === taskName);
   if (task) {
@@ -125,7 +110,6 @@ function completeNamedTask(taskName) {
   }
 }
 
-// --- Shop system example ---
 const shopItems = [
   { name: "Iron Sword", cost: 50, effect: () => player.stats.STR++ },
   { name: "Magic Potion", cost: 30, effect: () => player.stats.INT++ }
@@ -144,10 +128,4 @@ function buyItem(itemName) {
   updateUI();
 }
 
-// --- Initialization ---
 window.addEventListener("load", loadPlayerData);
-
-// --- Example usage ---
-// completeNamedTask("Drink Water");
-// completeNamedTask("Missed Sleep");
-// completeNegativeTask(20, 10);
