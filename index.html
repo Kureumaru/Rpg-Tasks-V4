@@ -252,9 +252,15 @@
         }
       }
 
-      if(!t.repeatable) state.tasks.splice(i,1);
+      if(t.repeatable) {
+        // Increment completion counter for repeatable tasks
+        t.count = (t.count || 0) + 1;
+      } else {
+        // Remove non-repeatable tasks after completion
+        state.tasks.splice(i,1);
+      }
       save(); renderAll();
-  toast(`${t.negative?'-':''}${Math.abs(xp)} XP, ${t.negative?'-':''}${Math.abs(gold)} Gold${statChangeText}`);
+      toast(`${t.negative?'-':''}${Math.abs(xp)} XP, ${t.negative?'-':''}${Math.abs(gold)} Gold${statChangeText}`);
     }
 
     function renderTasks(){
