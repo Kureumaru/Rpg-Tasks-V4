@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kureumaru — RPG Tasks (v6 fixed stat box)</title>
+  <title>Kureumaru — RPG Tasks (v7 negative tasks)</title>
   <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -35,7 +35,6 @@
       background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
       border-radius:18px;
       box-shadow:0 10px 40px rgba(2,6,23,.6),inset 0 1px 0 rgba(255,255,255,0.02);
-      /* allow scrolling instead of clipping on small screens */
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       max-height: calc(100vh - 48px);
@@ -65,15 +64,11 @@
     .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);border:0;padding:10px 14px;border-radius:10px;color:#041026;font-weight:600;cursor:pointer;transition:all var(--transition)}
     .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--muted)}
     .panel{background:rgba(3,6,16,0.45);padding:12px;border-radius:12px;margin-bottom:12px}
-  .panel{overflow:visible}
     ul.task-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
     li.task{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
-    .task .meta{width:100%}
-    .task h4{margin:0 0 4px 0}
     .badge{padding:4px 8px;border-radius:999px;font-size:11px;background:rgba(255,255,255,0.03);margin-right:4px;margin-bottom:4px;display:inline-block}
     .counter{font-size:12px;color:var(--muted);margin-left:4px}
     .task-controls{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-    .task-controls button{flex:1}
     .right-panel{padding:18px;display:flex;flex-direction:column;gap:12px}
     .muted{color:var(--muted);font-size:13px}
     .toast{position:fixed;right:22px;bottom:22px;background:#061a2b;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:none}
@@ -81,11 +76,6 @@
       .app{grid-template-columns:1fr}
       body{padding:12px}
       .app{max-height: calc(100vh - 24px); border-radius:12px}
-    }
-    @media (max-width:480px){
-      .attributes{grid-template-columns:repeat(3,1fr)}
-      .attr{padding:6px 4px}
-      .attr b{font-size:14px}
     }
   </style>
 </head>
@@ -103,28 +93,7 @@
       </div>
     </header>
 
-    <!-- 🧙 Left panel -->
-
-    <!-- New Task Modal -->
-    <div id="newTaskModal" style="display:none;position:fixed;inset:0;z-index:999;align-items:center;justify-content:center;background:rgba(2,6,23,0.6)">
-      <div style="background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;min-width:320px;max-width:90vw;border:1px solid rgba(255,255,255,0.04);max-height:90vh;overflow:auto;-webkit-overflow-scrolling:touch">
-        <h3 style="margin-top:0;margin-bottom:8px">New Quest</h3>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <input id="newTaskName" type="text" placeholder="Quest name" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
-          <div style="display:flex;gap:8px">
-            <select id="newTaskDifficulty" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
-            <select id="newTaskStat" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
-          </div>
-          <select id="newTaskCategory" style="padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
-          <label style="display:flex;gap:8px;align-items:center"><input id="newTaskBonus" type="checkbox"> Bonus (+20%)</label>
-          <label style="display:flex;gap:8px;align-items:center"><input id="newTaskRepeat" type="checkbox"> Repeatable</label>
-          <div style="display:flex;gap:8px;justify-content:flex-end">
-            <button id="cancelNewTask" class="btn outline">Cancel</button>
-            <button id="confirmNewTask" class="btn">Add Quest</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 🧙 Left Panel -->
     <aside class="left-panel">
       <div class="portrait"><img id="charPortrait" src="char.png" alt="Character"></div>
       <div class="stats">
@@ -139,8 +108,6 @@
             <small id="xpText" class="muted">0/100</small>
           </div>
         </div>
-
-        <!-- ✅ Stat Box Restored -->
         <div class="attributes" id="statGrid">
           <div class="attr"><b id="statStr">0</b><small>STR</small></div>
           <div class="attr"><b id="statDex">0</b><small>DEX</small></div>
@@ -169,16 +136,44 @@
     </aside>
   </div>
 
+  <!-- New Quest Modal -->
+  <div id="newTaskModal" style="display:none;position:fixed;inset:0;z-index:999;align-items:center;justify-content:center;background:rgba(2,6,23,0.6)">
+    <div style="background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;min-width:320px;max-width:90vw;border:1px solid rgba(255,255,255,0.04);max-height:90vh;overflow:auto;-webkit-overflow-scrolling:touch">
+      <h3 style="margin-top:0;margin-bottom:8px">New Quest</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="newTaskName" type="text" placeholder="Quest name" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+        <div style="display:flex;gap:8px">
+          <select id="newTaskDifficulty" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+          <select id="newTaskStat" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+        </div>
+        <select id="newTaskCategory" style="padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)"></select>
+
+        <!-- ✅ NEW: Negative Task Toggle -->
+        <label style="display:flex;gap:8px;align-items:center;color:var(--danger)">
+          <input id="newTaskNegative" type="checkbox"> Negative Quest (penalty)
+        </label>
+
+        <label style="display:flex;gap:8px;align-items:center"><input id="newTaskBonus" type="checkbox"> Bonus (+20%)</label>
+        <label style="display:flex;gap:8px;align-items:center"><input id="newTaskRepeat" type="checkbox"> Repeatable</label>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="cancelNewTask" class="btn outline">Cancel</button>
+          <button id="confirmNewTask" class="btn">Add Quest</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
     const qs=s=>document.querySelector(s);
     function deepClone(o){try{if(structuredClone)return structuredClone(o)}catch{}return JSON.parse(JSON.stringify(o))}
-    const defaultState={player:{level:1,xp:0,xpToNext:100,gold:0,hp:50,maxHp:50,stats:{str:5,dex:5,vit:5,int:5,wis:5,cha:5}},tasks:[]};
+    const defaultState={player:{level:1,xp:0,xpToNext:100,gold:0,stats:{str:5,dex:5,vit:5,int:5,wis:5,cha:5}},tasks:[]};
     let state=load();
 
     function load(){try{const raw=localStorage.getItem('kure_rpg');return raw?JSON.parse(raw):deepClone(defaultState)}catch{return deepClone(defaultState)}}
-    function save(){try{localStorage.setItem('kure_rpg',JSON.stringify(state))}catch{}}
+    function save(){localStorage.setItem('kure_rpg',JSON.stringify(state))}
     function toast(m){const t=qs('#toast');t.textContent=m;t.style.display='block';clearTimeout(t.h);t.h=setTimeout(()=>t.style.display='none',1500)}
 
     function renderPlayer(){
@@ -197,29 +192,83 @@
 
     function getRewardForDifficulty(d){const t={VeryEasy:{xp:5,gold:2},Easy:{xp:10,gold:5},Normal:{xp:20,gold:10},Medium:{xp:35,gold:20},Hard:{xp:60,gold:40},Legendary:{xp:120,gold:100}};return t[d]||t.Easy;}
 
+    // ✅ Updated completeTask supports negative quests and level-downs
+    function xpToNextForLevel(level){
+      // matches existing growth: each level multiplies xpToNext by ~1.25
+      // base is 100 at level 1
+      let xpNext = 100;
+      for(let l=1;l<level;l++) xpNext = Math.round(xpNext*1.25);
+      return xpNext;
+    }
+
     function completeTask(i){
-      const t=state.tasks[i];if(!t)return;
+      const t=state.tasks[i]; if(!t) return;
       const r=getRewardForDifficulty(t.difficulty);
-      const xp=Math.round(r.xp*(t.bonus?1.2:1));
-      const gold=Math.round(r.gold*(t.bonus?1.2:1));
-      state.player.xp+=xp;state.player.gold+=gold;
+      let xp = Math.round(r.xp*(t.bonus?1.2:1));
+      let gold = Math.round(r.gold*(t.bonus?1.2:1));
+      if(t.negative){ xp = -Math.abs(xp); gold = -Math.abs(gold); }
+
+      // Apply gold (never negative stored)
+      state.player.gold = Math.max(0, state.player.gold + gold);
+
+      // Apply XP - allow it to go below 0 temporarily
+      state.player.xp = state.player.xp + xp;
+
+      // Handle level-ups
+      while(state.player.xp >= state.player.xpToNext){
+        state.player.xp -= state.player.xpToNext;
+        state.player.level++;
+        state.player.xpToNext = Math.round(state.player.xpToNext*1.25);
+      }
+
+      // Handle level-downs if XP went negative
+      while(state.player.xp < 0 && state.player.level > 1){
+        // Step down one level
+        state.player.level--;
+        // recompute xpToNext for the (new) current level
+        state.player.xpToNext = xpToNextForLevel(state.player.level);
+        // When stepping down, previous level's xp should be xpToNext - deficit
+        // So add xpToNext to xp (since xp is negative) to move into positive range for lower level
+        state.player.xp += state.player.xpToNext;
+        // If after adding we are still negative, loop will continue
+      }
+
+      // Clamp to zero if we're at level 1 and xp negative
+      if(state.player.level === 1 && state.player.xp < 0) state.player.xp = 0;
+
+      // Stats: gain on positive quests, deduct on negative quests (by 1), but never below 0
       const map={strength:'str',dexterity:'dex',vitality:'vit',intelligence:'int',wisdom:'wis',charisma:'cha'};
       const key=map[t.stat];
-      if(key&&!t.negative)state.player.stats[key]++;
-      if(t.repeatable)t.count=(t.count||0)+1;else state.tasks.splice(i,1);
-      while(state.player.xp>=state.player.xpToNext){state.player.xp-=state.player.xpToNext;state.player.level++;state.player.xpToNext=Math.round(state.player.xpToNext*1.25);}
-      save();renderAll();toast(`+${xp} XP, +${gold} Gold`);
+      let statChangeText = '';
+      if(key && state.player.stats && typeof state.player.stats[key] !== 'undefined'){
+        if(t.negative && xp < 0){
+          // Deduct one stat point for negative quests, don't go below 0
+          const oldVal = state.player.stats[key] || 0;
+          state.player.stats[key] = Math.max(0, oldVal - 1);
+          statChangeText = `, ${key.toUpperCase()} -1`;
+        } else if(!t.negative && xp > 0){
+          state.player.stats[key]++;
+          statChangeText = `, ${key.toUpperCase()} +1`;
+        }
+      }
+
+      if(!t.repeatable) state.tasks.splice(i,1);
+      save(); renderAll();
+  toast(`${t.negative?'-':''}${Math.abs(xp)} XP, ${t.negative?'-':''}${Math.abs(gold)} Gold${statChangeText}`);
     }
 
     function renderTasks(){
       const ul=qs('#taskList');ul.innerHTML='';
       state.tasks.forEach((t,i)=>{
         const li=document.createElement('li');li.className='task';
+        if(t.negative) li.style.borderColor='rgba(239,68,68,0.3)';
         const meta=document.createElement('div');meta.className='meta';
-        meta.innerHTML=`<h4><span style="color:${t.color||'#fff'}">${t.name}</span></h4>`;
+        meta.innerHTML=`<h4><span style="color:${t.negative?'var(--danger)':t.color||'#fff'}">${t.name}</span></h4>`;
         const badges=document.createElement('div');badges.className='badges';
         const add=b=>{const s=document.createElement('span');s.className='badge';s.textContent=b;badges.appendChild(s);}
-        if(t.difficulty)add(t.difficulty);if(t.category)add(t.category);if(t.stat)add(t.stat);if(t.repeatable){add('Repeatable');const c=document.createElement('span');c.className='counter';c.textContent='Times: '+(t.count||0);badges.appendChild(c);}
+        if(t.negative)add('Penalty');
+        if(t.difficulty)add(t.difficulty);if(t.category)add(t.category);if(t.stat)add(t.stat);
+        if(t.repeatable){add('Repeatable');const c=document.createElement('span');c.className='counter';c.textContent='Times: '+(t.count||0);badges.appendChild(c);}
         meta.appendChild(badges);
         const actions=document.createElement('div');
         const done=document.createElement('button');done.className='btn outline';done.style.padding='6px 10px';done.textContent='Complete';done.onclick=()=>completeTask(i);
@@ -228,67 +277,49 @@
       });
     }
 
-    // Populate modal selects
-    const difficultyKeys = ['VeryEasy','Easy','Normal','Medium','Hard','Legendary'];
-    const statOptions = [{v:'strength',t:'Strength'},{v:'dexterity',t:'Dexterity'},{v:'vitality',t:'Vitality'},{v:'intelligence',t:'Intelligence'},{v:'wisdom',t:'Wisdom'},{v:'charisma',t:'Charisma'},{v:'',t:'None'}];
-    const categories = ['General','Combat','Crafting','Exploration','Social','Chores','Study','Errands','Magic','Stealth','Fitness'];
+    const difficultyKeys=['VeryEasy','Easy','Normal','Medium','Hard','Legendary'];
+    const statOptions=[{v:'strength',t:'Strength'},{v:'dexterity',t:'Dexterity'},{v:'vitality',t:'Vitality'},{v:'intelligence',t:'Intelligence'},{v:'wisdom',t:'Wisdom'},{v:'charisma',t:'Charisma'},{v:'',t:'None'}];
+    const categories=['General','Combat','Crafting','Exploration','Social','Chores','Study','Errands','Magic','Stealth','Fitness'];
 
     function populateNewTaskModal(){
       const dSel=qs('#newTaskDifficulty');dSel.innerHTML='';difficultyKeys.forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k; if(k==='Easy')o.selected=true;dSel.appendChild(o)});
-      const sSel=qs('#newTaskStat');sSel.innerHTML='';statOptions.forEach(s=>{const o=document.createElement('option');o.value=s.v;o.textContent=s.t; sSel.appendChild(o)});
+      const sSel=qs('#newTaskStat');sSel.innerHTML='';statOptions.forEach(s=>{const o=document.createElement('option');o.value=s.v;o.textContent=s.t;sSel.appendChild(o)});
       const cSel=qs('#newTaskCategory');cSel.innerHTML='';categories.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cSel.appendChild(o)});
     }
 
-    qs('#showNewTask').onclick=()=>{populateNewTaskModal();qs('#newTaskName').value='';qs('#newTaskBonus').checked=false;qs('#newTaskRepeat').checked=false;qs('#newTaskModal').style.display='flex';}
-    qs('#cancelNewTask').onclick=()=>{qs('#newTaskModal').style.display='none'};
+    qs('#showNewTask').onclick=()=>{populateNewTaskModal();qs('#newTaskName').value='';qs('#newTaskBonus').checked=false;qs('#newTaskRepeat').checked=false;qs('#newTaskNegative').checked=false;qs('#newTaskModal').style.display='flex';}
+    qs('#cancelNewTask').onclick=()=>qs('#newTaskModal').style.display='none';
     qs('#confirmNewTask').onclick=()=>{
       const name=qs('#newTaskName').value.trim();if(!name){toast('Please enter a quest name');return}
-      const diff=qs('#newTaskDifficulty').value;const stat=qs('#newTaskStat').value;const cat=qs('#newTaskCategory').value;const bonus=qs('#newTaskBonus').checked;const rep=qs('#newTaskRepeat').checked;
-      state.tasks.push({name,difficulty:diff,stat,category:cat,bonus,repeatable:rep,count:0,color:'#c084fc'});
+      const diff=qs('#newTaskDifficulty').value;const stat=qs('#newTaskStat').value;const cat=qs('#newTaskCategory').value;
+      const bonus=qs('#newTaskBonus').checked;const rep=qs('#newTaskRepeat').checked;const neg=qs('#newTaskNegative').checked;
+      state.tasks.push({name,difficulty:diff,stat,category:cat,bonus,repeatable:rep,count:0,negative:neg,color:'#c084fc'});
       save();renderTasks();qs('#newTaskModal').style.display='none';toast('Quest added');
     };
+
     qs('#resetGameBtn').onclick=()=>{if(confirm('Reset all data?')){state=deepClone(defaultState);save();renderAll();toast('Reset!');}};
 
-    // Export save handler
     qs('#exportSaveBtn').onclick=()=>{
-      const saveData = JSON.stringify(state, null, 2);
-      const blob = new Blob([saveData], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const date = new Date().toISOString().split('T')[0];
-      a.download = `rpg-tasks-save-${date}.json`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
+      const saveData=JSON.stringify(state,null,2);
+      const blob=new Blob([saveData],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      const date=new Date().toISOString().split('T')[0];
+      a.download=`rpg-tasks-save-${date}.json`;
+      document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
       toast('Save file exported!');
     };
 
-    // Import save handler
     qs('#importSaveBtn').onclick=()=>qs('#importSaveFile').click();
     qs('#importSaveFile').onchange=(e)=>{
-      const file = e.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload=(e)=>{
-        try {
-          const importedState = JSON.parse(e.target.result);
-          if(importedState && importedState.player && importedState.tasks) {
-            state = importedState;
-            save();
-            renderAll();
-            toast('Save imported successfully!');
-          } else {
-            toast('Invalid save file format');
-          }
-        } catch(err) {
-          toast('Error reading save file');
-          console.error('Import error:', err);
-        }
-      };
+      const file=e.target.files[0];if(!file)return;
+      const reader=new FileReader();
+      reader.onload=(e)=>{try{
+        const importedState=JSON.parse(e.target.result);
+        if(importedState&&importedState.player&&importedState.tasks){state=importedState;save();renderAll();toast('Save imported successfully!');}
+        else toast('Invalid save file');
+      }catch(err){toast('Error reading save');}};
       reader.readAsText(file);
     };
 
